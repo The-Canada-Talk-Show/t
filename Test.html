@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Blog System</title>
+
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.19.0/firebase-analytics.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/9.19.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+     apiKey: "AIzaSyDYhzjjtv6AJ3POkM4L_BqQKrgufLqD5S0",
+	authDomain: "blog-7f1ea.firebaseapp.com",
+	projectId: "blog-7f1ea",
+	storageBucket: "blog-7f1ea.appspot.com",
+	messagingSenderId: "342999829521",
+	appId: "1:342999829521:web:d20cca067ca525fbf5b5b0",
+	measurementId: "G-W3J3KGYX90"
+
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+  </script>
+
+  <!-- CSS Styles -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .post {
+      margin: 30px 0;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 20px;
+    }
+
+    .post h2 {
+      margin-top: 0;
+    }
+
+    .post p {
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    textarea {
+      padding: 10px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: none;
+    }
+
+    textarea {
+      height: 150px;
+    }
+
+    button {
+      background-color: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <h1>Blog System</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <h2>Recent Posts</h2>
+
+    <div id="posts">
+      <!-- Posts will be added here dynamically -->
+    </div>
+
+    <h2>Create a New Post</h2>
+
+    <form id="addPostForm">
+      <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+
+      <div class="form-group">
+        <label for="content">Content:</label>
+        <textarea id="content"></textarea>
+      </div>
+
+      <button type="submit">Add Post</button>
+    </form>
+  </div>
+
+  <!-- Firebase scripts -->
+  <script type="module">
+    import { addPost, getPosts } from './firebase.js';
+
+    const addPostForm = document.getElementById('addPostForm');
+    const postsContainer = document.getElementById('posts');
+
+    // Submit event listener for adding a new post
+    addPostForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const { title, content } = event.target.elements;
+
+      // Add post to Firestore
+      await addPost(title.value, content.value);
+
+      // Clear form inputs
+      title.value = '';
+      content.value = '';
+
+      // Refresh posts
+      await refreshPosts();
+    });
+
+    // Refresh posts on page load
+    window.addEventListener('load', async () => {
+      await refreshPosts();
+    });
+
+    // Refresh posts function
+    async function refreshPosts() {
+      // Clear posts container
+      postsContainer.innerHTML = '';
+
+      // Get posts from Firestore
+      const posts = await getPosts();
+
+      // Loop through posts and add to container
+      posts.forEach((post) => {
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.innerHTML = `
+          <h2>${post.title}</h2>
+          <p>${post.content}</p>
+        `;
+        postsContainer.appendChild(postElement);
+      });
+    }
+  </script>
+</body>
+
+</html>
+
+
+
